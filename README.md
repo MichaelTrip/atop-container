@@ -8,15 +8,64 @@ This is an automated build pipeline for the [atop](https://github.com/Atoptool/a
 
 ## How to run this container on a Kubernetes host
 
-### `kubectl debug node`
+### Run a pod on your node
 
-You could use this by running a interactive pod for debugging purposes. In that case run:
+You could use this by running a pod on a specific node. This can be done by using the following yaml file:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: atop-container
+  labels:
+    app: atop-container
+spec:
+  containers:
+  - name: atop
+    image: ghcr.io/michaeltrip/atop-container:latest
+    command: ["sh", "-c", "sleep infinity"]
+    securityContext:
+      privileged: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    volumeMounts:
+    - mountPath: /sys
+      name: sys
+      readOnly: true
+    - mountPath: /var/run
+      name: varrun
+      readOnly: false
+    - mountPath: /var/log
+      name: varlog
+      readOnly: false
+  hostNetwork: true
+  hostPID: true
+  volumes:
+  - name: sys
+    hostPath:
+      path: /sys
+  - name: varrun
+    hostPath:
+      path: /var/run
+  - name: varlog
+    hostPath:
+      path: /var/log
+  restartPolicy: Never
+  nodeSelector:
+    kubernetes.io/hostname: "<nodename>"
+  ```
+
+This will run a privileged pod with a sleep infinity. From there you can exec into the pod:
 
 ```bash
-kubectl debug -it node/<nodename> --image=ghcr.io/michaeltrip/atop-container:latest
+kubectl exec -it <podname> -- /bin/bash
 ```
 
-This will start a privileged pod on the node. You can run atop from here.
 
 ### `DaemonSet`
 
@@ -39,19 +88,40 @@ spec:
         app: atop-container
     spec:
       containers:
-      - name: atop-container
+      - name: atop
         image: ghcr.io/michaeltrip/atop-container:latest
+        command: ["sh", "-c", "sleep infinity"]
         securityContext:
           privileged: true
         resources:
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
           requests:
-            memory: "64Mi"
+            memory: "256Mi"
             cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - mountPath: /sys
+          name: sys
+          readOnly: true
+        - mountPath: /var/run
+          name: varrun
+          readOnly: false
+        - mountPath: /var/log
+          name: varlog
+          readOnly: false
       hostNetwork: true
       hostPID: true
+      volumes:
+      - name: sys
+        hostPath:
+          path: /sys
+      - name: varrun
+        hostPath:
+          path: /var/run
+      - name: varlog
+        hostPath:
+          path: /var/log
       tolerations:
       - effect: NoSchedule
         operator: Exists
