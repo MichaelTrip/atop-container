@@ -43,6 +43,9 @@ spec:
     - mountPath: /var/log
       name: varlog
       readOnly: false
+    - mountPath: /proc
+      name: proc
+      readOnly: true
   hostNetwork: true
   hostPID: true
   volumes:
@@ -55,6 +58,9 @@ spec:
   - name: varlog
     hostPath:
       path: /var/log
+  - name: proc
+    hostPath:
+      path: /proc
   restartPolicy: Never
   nodeSelector:
     kubernetes.io/hostname: "<nodename>"
@@ -110,6 +116,10 @@ spec:
         - mountPath: /var/log
           name: varlog
           readOnly: false
+        - mountPath: /proc
+          name: proc
+          readOnly: true
+      hostNetwork: true
       hostNetwork: true
       hostPID: true
       volumes:
@@ -122,6 +132,9 @@ spec:
       - name: varlog
         hostPath:
           path: /var/log
+      - name: proc
+        hostPath:
+          path: /proc
       tolerations:
       - effect: NoSchedule
         operator: Exists
