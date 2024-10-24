@@ -7,7 +7,7 @@ RUN dnf -y update && \
 
 # Fixing, or forcing the TERM variable to be in xterm-256color.
 # This because atop -B won't work without it
-RUN echo "export TERM=xterm-256color" >> /etc/profile
+RUN echo "export TERM=xterm-256color" >> /etc/bashrc
 
 # Basiscally running a bash shell. Should be de init system when s6 is implemented
 CMD ["/bin/bash"]
