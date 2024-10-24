@@ -149,4 +149,8 @@ kubectl apply -f daemonset.yaml
 
 After that, you can execute directly on the daemonset running on your node with `kubectl exec -it <podname> -- /bin/bash` and start atop from there.
 
+## Persistency of atop log files
+
+If you want the atop logfiles to persist, you have to mount `/var/log/atop` to a persistent volume.
+
 
